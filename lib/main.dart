@@ -162,8 +162,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
   
   Future<void> confirmScan(String hasil, int step) async {
-    if (!confirmScanEnabled) return; // jika confirmScan dimatikan, keluar
-  
+    if (!confirmScanEnabled) return;
+
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -181,12 +181,21 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
     );
-  
+
     if (confirm == true) {
       if (step == 1) {
-        setState(() => scanStep = 2);
+        setState(() {
+          hasilScan1 = hasil;
+          scanStep = 2;
+        });
       } else if (step == 2) {
-        await confirmAndSave(); // confirmScan mati di sini
+        setState(() {
+          hasilScan2 = hasil;
+          double num1 = double.tryParse(hasilScan1) ?? 0;
+          double num2 = double.tryParse(hasilScan2) ?? 0;
+          selisih = num2 - num1;
+        });
+        await confirmAndSave(); // Panggil setelah hasilScan2 fix
       }
     } else {
       setState(() {
@@ -195,7 +204,6 @@ class _MyHomePageState extends State<MyHomePage> {
       });
     }
   }
-
 
   void refreshScan() {
     setState(() {
@@ -273,23 +281,52 @@ class _MyHomePageState extends State<MyHomePage> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   TextField(
-                    decoration: const InputDecoration(labelText: 'Masukkan Nama'),
+                    decoration: const InputDecoration(labelText: 'Masukkan Nama', border: OutlineInputBorder()),
+                    style: const TextStyle(fontSize: 18),
                     onChanged: (val) => setState(() => name = val),
                   ),
+                  const SizedBox(height: 15),
                   TextField(
-                    decoration: const InputDecoration(labelText: 'Masukkan ID'),
+                    decoration: const InputDecoration(labelText: 'Masukkan ID', border: OutlineInputBorder()),
+                    style: const TextStyle(fontSize: 18),
                     onChanged: (val) => setState(() => id = val),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 10),
-            Text("Hasil Scan 1: $hasilScan1"),
-            Text("Hasil Scan 2: $hasilScan2"),
-            Text("Selisih: $selisih"),
+            const SizedBox(height: 20),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(child: Text("Hasil Scan 1:", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))),
+                      Expanded(child: Text(hasilScan1, style: TextStyle(fontSize: 20))),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(child: Text("Hasil Scan 2:", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))),
+                      Expanded(child: Text(hasilScan2, style: TextStyle(fontSize: 20))),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(child: Text("Selisih:", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))),
+                      Expanded(child: Text(selisih.toString(), style: TextStyle(fontSize: 20))),
+                    ],
+                  ),
+                ],
+              ),
+            ),
 
             const SizedBox(height: 20),
             ElevatedButton(
